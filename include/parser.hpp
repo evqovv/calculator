@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <functional>
+
 #include "lexer.hpp"
 
 namespace evqovv {
@@ -31,13 +32,14 @@ private:
   }
 
   auto parse_function() -> mpfr_num {
-    if (!ft.contains(::std::get<::std::string>(cur_token.data))) {
+    auto func_name = ::std::get<::std::string>(cur_token.data);
+    if (!ft.contains(func_name)) {
       throw ::std::runtime_error("");
     }
 
     next_token();
 
-    return ft.at(::std::get<::std::string>(cur_token.data))(parse_expression());
+    return ft.at(func_name)(parse_expression());
   }
 
   auto parse_parentheses() -> mpfr_num {

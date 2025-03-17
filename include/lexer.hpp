@@ -20,12 +20,12 @@ enum class token_kind : unsigned char {
 
 struct token {
   token_kind kind;
-  ::std::variant<::std::string, mpfr_num> data;
+  std::variant<std::string, mpfr_num> data;
 };
 
 class lexer {
 public:
-  explicit lexer(::std::string_view e) : expr(e), cur_pos(expr.cbegin()) {}
+  explicit lexer(std::string_view e) : expr(e), cur_pos(expr.cbegin()) {}
 
   auto get_token() -> token {
     skip_whitespace();
@@ -34,11 +34,11 @@ public:
       return {token_kind::end};
     }
 
-    if (::std::isdigit(*cur_pos) || *cur_pos == '.') {
+    if (std::isdigit(*cur_pos) || *cur_pos == '.') {
       return {token_kind::number, get_number()};
     }
 
-    if (::std::isalpha(*cur_pos)) {
+    if (std::isalpha(*cur_pos)) {
       return {token_kind::function, get_word()};
     }
 
@@ -57,13 +57,13 @@ public:
     case ')':
       return {token_kind::right_parenthesis};
     default:
-      throw ::std::runtime_error("Unknown token.");
+      throw std::runtime_error("Unknown token.");
     }
   }
 
 private:
   auto skip_whitespace() noexcept -> void {
-    for (; cur_pos != expr.cend() && ::std::isspace(*cur_pos); ++cur_pos) {
+    for (; cur_pos != expr.cend() && std::isspace(*cur_pos); ++cur_pos) {
     }
   }
 
@@ -97,18 +97,18 @@ private:
 
       break;
     }
-    return {::std::string(begin_pos, cur_pos)};
+    return {std::string(begin_pos, cur_pos)};
   }
 
-  auto get_word() -> ::std::string {
+  auto get_word() -> std::string {
     auto begin_pos = cur_pos;
-    cur_pos = ::std::find_if(begin_pos, expr.cend(), [](auto &&ch) -> bool {
-      return !::std::isalpha(ch);
+    cur_pos = std::find_if(begin_pos, expr.cend(), [](auto &&ch) -> bool {
+      return !std::isalpha(ch);
     });
     return {begin_pos, cur_pos};
   }
 
-  ::std::string expr;
-  ::std::string::const_iterator cur_pos;
+  std::string expr;
+  std::string::const_iterator cur_pos;
 };
 } // namespace evqovv
