@@ -3,7 +3,6 @@
 #include <mpfr.h>
 #include <string>
 #include <stdexcept>
-#include <format>
 
 namespace evqovv {
 class mpfr_num {
@@ -88,13 +87,15 @@ public:
     return perform_op(mpfr_div, o);
   }
 
+  auto is_integer_number() const noexcept -> bool {
+    return mpfr_integer_p(num) == 1;
+  }
+
 private:
   using mpfr_op_t = int (*)(mpfr_t, mpfr_t const, mpfr_t const, mpfr_rnd_t);
 
   auto perform_op(mpfr_op_t op, mpfr_num const &x) -> mpfr_num & {
-    if (auto ret = op(num, num, x.num, MPFR_RNDN); ret != 0) {
-      throw ret;
-    }
+    op(num, num, x.num, MPFR_RNDN);
     return *this;
   }
 
@@ -122,26 +123,4 @@ inline auto sqrt(mpfr_num x) -> mpfr_num {
   mpfr_sqrt(x.num, x.num, MPFR_RNDN);
   return x;
 }
-
-::std::ostream &operator<<(::std::ostream &os, mpfr_num const &x);
-class set_mpfr_precision {
-  friend ::std::ostream &operator<<(::std::ostream &os, mpfr_num const &x) {
-    ::std::string f_str;
-    if (mpfr_integer_p(x.native()) == 1) {
-      f_str = "%Zd";
-    } else {
-      f_str = ::std::format("%.{}Rf", precision);
-    }
-    mpfr_printf(f_str.c_str(), x.native());
-    return os;
-  }
-
-public:
-  set_mpfr_precision(int p) { precision = p; }
-
-private:
-  inline static int precision = 10;
-  inline static bool integer_with_decimal = false;
-};
-
 } // namespace evqovv

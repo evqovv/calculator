@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "parser.hpp"
-#include "mpfr_formatter.hpp"
+#include "mpfr_converter.hpp"
 
 namespace evqovv {
 class application {
@@ -17,7 +17,11 @@ public:
     if (args.empty()) {
       cmd();
     } else {
-      std::print("{}\n", formatter(concatenate_str()));
+      try {
+        std::print("{}\n", converter(concatenate_str()));
+      } catch (std::exception const &e) {
+        std::print("{}\n", e.what());
+      }
     }
   }
 
@@ -28,7 +32,13 @@ private:
       std::print("-> ");
       std::getline(std::cin, input);
 
-      std::print("{}\n", formatter(evaluate_expression(input)));
+      try {
+        execute_cmd(input);
+
+        std::print("{}\n", converter(evaluate_expression(input)));
+      } catch (std::exception const &e) {
+        std::print("{}\n", e.what());
+      }
     }
   }
 
@@ -39,7 +49,10 @@ private:
                  std::ranges::to<std::vector>();
     if (parts.size() == 1) {
 
-    } else {
+    } else if (parts.size() == 3) {
+      if (parts[0] == "set") {
+        env.set(parts[1], parts[2]);
+      }
     }
   }
 
@@ -53,9 +66,10 @@ private:
 
   static auto exit() -> void { std::exit(0); }
 
-  mpfr_formatter formatter;
+  mpfr_env env;
+  mpfr_converter converter{env};
   std::vector<std::string> args;
-  std::unordered_map<std::string, std::function<void()>> ft = {
+  std::unordered_map<std::string, std::function<void()>> const ft{
       {"quit", exit},
       {"exit", exit},
   };

@@ -8,7 +8,7 @@
 namespace evqovv {
 class parser {
 public:
-  parser(::std::string_view expr) : l(expr) { next_token(); }
+  parser(std::string_view expr) : l(expr) { next_token(); }
 
   auto parse_expression() -> mpfr_num;
 
@@ -21,20 +21,18 @@ private:
         cur_token.kind == token_kind::subtraction ||
         cur_token.kind == token_kind::multiplication ||
         cur_token.kind == token_kind::division) {
-      throw ::std::runtime_error("Parsing failed.");
+      throw std::runtime_error("Parsing failed.");
     }
 
     return (kind == token_kind::subtraction) ? -parse_factor() : parse_factor();
   }
 
-  auto parse_number() -> mpfr_num {
-    return ::std::get<mpfr_num>(cur_token.data);
-  }
+  auto parse_number() -> mpfr_num { return std::get<mpfr_num>(cur_token.data); }
 
   auto parse_function() -> mpfr_num {
-    auto func_name = ::std::get<::std::string>(cur_token.data);
+    auto func_name = std::get<std::string>(cur_token.data);
     if (!ft.contains(func_name)) {
-      throw ::std::runtime_error("");
+      throw std::runtime_error("");
     }
 
     next_token();
@@ -48,7 +46,7 @@ private:
     auto x = parse_expression();
 
     if (cur_token.kind != token_kind::right_parenthesis) {
-      throw ::std::runtime_error("Parsing failed.");
+      throw std::runtime_error("Parsing failed.");
     }
 
     return x;
@@ -63,17 +61,16 @@ private:
   lexer l;
   token cur_token;
 
-  const ::std::unordered_map<::std::string, ::std::function<mpfr_num(mpfr_num)>>
-      ft{
-          {"sqrt", sqrt},
-      };
+  std::unordered_map<std::string, std::function<mpfr_num(mpfr_num)>> const ft{
+      {"sqrt", sqrt},
+  };
 };
 
 inline auto parser::parse_expression() -> mpfr_num {
   auto x = parse_term();
 
   while (cur_token.kind == token_kind::addition ||
-        cur_token.kind == token_kind::subtraction) {
+         cur_token.kind == token_kind::subtraction) {
     auto kind = cur_token.kind;
 
     next_token();
@@ -94,7 +91,7 @@ inline auto parser::parse_term() -> mpfr_num {
   auto x = parse_factor();
 
   while (cur_token.kind == token_kind::multiplication ||
-        cur_token.kind == token_kind::division) {
+         cur_token.kind == token_kind::division) {
     auto kind = cur_token.kind;
 
     next_token();
@@ -129,7 +126,7 @@ inline auto parser::parse_factor() -> mpfr_num {
     x = parse_function();
     break;
   default:
-    throw ::std::runtime_error("Parsing failed.");
+    throw std::runtime_error("Parsing failed.");
     break;
   }
 
