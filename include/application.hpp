@@ -31,6 +31,9 @@ private:
     while (true) {
       std::print("-> ");
       std::getline(std::cin, input);
+      if (input.empty()) {
+        continue;
+      }
 
       try {
         execute_cmd(input);
