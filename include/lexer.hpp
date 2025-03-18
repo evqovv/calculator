@@ -25,9 +25,14 @@ struct token {
 
 class lexer {
 public:
-  explicit lexer(std::string_view e) : expr(e), cur_pos(expr.cbegin()) {}
+  explicit lexer(std::string_view e)
+      : expr(e), cur_pos(expr.cbegin()), prev_pos(cur_pos) {}
+
+  auto rewind_to_previous_token() { cur_pos = prev_pos; }
 
   auto get_token() -> token {
+    prev_pos = cur_pos;
+
     skip_whitespace();
 
     if (cur_pos == expr.cend()) {
@@ -102,13 +107,13 @@ private:
 
   auto get_word() -> std::string {
     auto begin_pos = cur_pos;
-    cur_pos = std::find_if(begin_pos, expr.cend(), [](auto &&ch) -> bool {
-      return !std::isalpha(ch);
-    });
+    cur_pos = std::find_if(begin_pos, expr.cend(),
+                           [](auto &&ch) -> bool { return !std::isalpha(ch); });
     return {begin_pos, cur_pos};
   }
 
   std::string expr;
   std::string::const_iterator cur_pos;
+  std::string::const_iterator prev_pos;
 };
 } // namespace evqovv

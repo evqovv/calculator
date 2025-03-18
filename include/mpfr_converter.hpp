@@ -27,8 +27,7 @@ private:
   }
 
   auto get_integer_format_string() const -> ::std::string {
-    return env.get_always_show_trailing_zero() ? get_floating_format_string()
-                                               : "%.0Rf";
+    return env.get_keep_decimal() ? get_floating_format_string() : "%.0Rf";
   }
 
   mpfr_env const &env;

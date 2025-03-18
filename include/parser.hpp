@@ -21,7 +21,10 @@ private:
         cur_token.kind == token_kind::subtraction ||
         cur_token.kind == token_kind::multiplication ||
         cur_token.kind == token_kind::division) {
-      throw std::runtime_error("Parsing failed.");
+      throw std::runtime_error(
+          "An unexpected symbol appears after a sign bit.");
+    } else {
+      l.rewind_to_previous_token();
     }
 
     return (kind == token_kind::subtraction) ? -parse_factor() : parse_factor();
@@ -32,12 +35,22 @@ private:
   auto parse_function() -> mpfr_num {
     auto func_name = std::get<std::string>(cur_token.data);
     if (!ft.contains(func_name)) {
-      throw std::runtime_error("");
+      throw std::runtime_error("This function does not exist.");
     }
 
     next_token();
+    if (cur_token.kind != token_kind::left_parenthesis) {
+      throw std::runtime_error("Missing expected '('.");
+    }
+    next_token();
 
-    return ft.at(func_name)(parse_expression());
+    auto x = parse_expression();
+
+    if (cur_token.kind != token_kind::right_parenthesis) {
+      throw std::runtime_error("Missing expected ')'.");
+    }
+
+    return ft.at(func_name)(x);
   }
 
   auto parse_parentheses() -> mpfr_num {
@@ -46,7 +59,7 @@ private:
     auto x = parse_expression();
 
     if (cur_token.kind != token_kind::right_parenthesis) {
-      throw std::runtime_error("Parsing failed.");
+      throw std::runtime_error("Missing expected ')'.");
     }
 
     return x;
@@ -126,7 +139,7 @@ inline auto parser::parse_factor() -> mpfr_num {
     x = parse_function();
     break;
   default:
-    throw std::runtime_error("Parsing failed.");
+    throw std::runtime_error("Missing an operand.");
     break;
   }
 
